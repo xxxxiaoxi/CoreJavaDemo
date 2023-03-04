@@ -22,7 +22,7 @@ final class StudentImmutableClass {
         this.studentId = studentId;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.course = course;
+        this.course = deepCopy(course);
     }
 
     public int getStudentId() {
