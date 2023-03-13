@@ -37,7 +37,7 @@ class CallableThread implements Callable {
     }
 }
 public class Day4Note {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
         ExecutorService tp1 = Executors.newFixedThreadPool(2);
         ExecutorService tp2 = Executors.newSingleThreadExecutor();
         ExecutorService tp3 = Executors.newCachedThreadPool();
@@ -79,10 +79,10 @@ public class Day4Note {
 //        Thread t2 = new Thread(new RunnableThread());
 //        t2.start();
 //
-//        FutureTask task = new FutureTask(new CallableThread());
-//        Thread t3 = new Thread(task);
-//        t3.start();
-//        System.out.println(task.get());
+        FutureTask task = new FutureTask(new CallableThread());
+        Thread t3 = new Thread(task);
+        t3.start();
+        System.out.println(task.get());
 
 //        List<Student> list = new ArrayList<>();
 //        list.add(new Student("Achen", 18, 65));
