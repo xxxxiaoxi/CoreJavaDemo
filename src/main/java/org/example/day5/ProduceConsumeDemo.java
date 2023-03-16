@@ -1,11 +1,6 @@
 package org.example.day5;
 
-
 import java.util.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 
 /*
       producers  ->  [queue size = 3]   <- consumers
@@ -47,47 +42,38 @@ class ProducerConsumerModel {
     private final int capacity = 3;
     private Random myRandom = new Random();
 
-    Lock lock = new ReentrantLock();
-    Condition queueNotFull = lock.newCondition();
-    Condition queueNotEmpty = lock.newCondition();
-
     public void put() {
-        lock.lock();
-        try {
-            while (queue.size() == capacity) {
-                System.out.println(Thread.currentThread().getName() + " wait, queue is full");
-                queueNotFull.await();
-            }
-            int tempValue = myRandom.nextInt(100);
-            queue.offer(tempValue);
-            System.out.println(Thread.currentThread().getName() + " put " + tempValue);
-            queueNotEmpty.signalAll();
+        synchronized (this) {
+            try {
+                while (queue.size() == capacity) {
+                    System.out.println(Thread.currentThread().getName() + " wait, queue is full");
+                    wait();
+                }
+                int tempValue = myRandom.nextInt(100);
+                queue.offer(tempValue);
+                System.out.println(Thread.currentThread().getName() + " put " + tempValue);
+                notifyAll();
 
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.unlock();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
-
     public void take() {
-        lock.lock();
-        try {
-            while (queue.isEmpty()) {
-                System.out.println(Thread.currentThread().getName() + " wait, queue is empty");
-                queueNotEmpty.await();
+        synchronized (this) {
+            try {
+                while (queue.isEmpty()) {
+                    System.out.println(Thread.currentThread().getName() + " wait, queue is empty");
+                    wait();
+                }
+                int tempValue = queue.poll();
+                System.out.println(Thread.currentThread().getName() + " take " + tempValue);
+                notifyAll();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            int tempValue = queue.poll();
-            System.out.println(Thread.currentThread().getName() + " take " + tempValue);
-            queueNotFull.signalAll();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            lock.unlock();
         }
-
     }
-
 }
 
 class Producer extends Thread{
@@ -115,6 +101,4 @@ class Consumer extends Thread {
     public void run() {
         pc.take();;
     }
-
-
 }
